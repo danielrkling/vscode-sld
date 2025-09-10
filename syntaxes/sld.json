@@ -1,38 +1,82 @@
 {
-  "fileTypes": [
-    "js",
-    "mjs",
-    "jsx",
-    "ts",
-    "mts",
-    "tsx"
-  ],
-  "injectionSelector": "L:source.js -comment -string, L:source.mjs -comment -string, L:source.jsx -comment -string, L:source.ts -comment -string, L:source.mts -comment -string, L:source.tsx -comment -string",
-  "injections": {
-    "L:source": {
+  "scopeName": "source.sld",
+  "injectionSelector": "L:source.js, L:source.ts T:template-string.sld",
+  "patterns": [{ "include": "#xml" }],
+  "repository": {
+    "xml": {
       "patterns": [
+
         {
-          "match": "<",
-          "name": "invalid.illegal.bad-angle-bracket.html"
+          "begin": "<\/?(?=[A-Z][\\w\\-\\.]*)",
+          "beginCaptures": {
+            "0": { "name": "punctuation.definition.tag.sld" }
+          },
+          "end": "(?=>)",
+          "patterns": [
+            {
+              "name": "entity.name.class.sld",
+              "match": "[A-Z][\\w\\-\\.]*"
+            },
+            {
+              "name": "variable.parameter.sld",
+              "match": "[a-zA-Z_][\\w\\-\\.]*="
+            },
+            {
+              "name": "variable.parameter.boolean.sld",
+              "match": "[a-zA-Z_][\\w\\-\\.]*"
+            },
+            {
+              "name": "string.quoted.sld",
+              "match": "\"[^\"]*\"|'[^']*'"
+            },
+            {
+              "name": "punctuation.definition.tag.sld",
+              "match": "/"
+            }
+          ]
+        },
+        {
+          "begin": "<\/?(?=[a-z][\\w\\-\\.]*)",
+          "beginCaptures": {
+            "0": { "name": "punctuation.definition.tag.sld" }
+          },
+          "end": "(?=>)",
+          "patterns": [
+            {
+              "name": "entity.name.tag.sld",
+              "match": "(?<=<\/?)[a-z][\\w\\-\\.]*"
+            },
+            {
+              "name": "variable.parameter.sld",
+              "match": "[a-zA-Z_][\\w\\-\\.]*="
+            },
+            {
+              "name": "variable.parameter.boolean.sld",
+              "match": "[a-zA-Z_][\\w\\-\\.]*"
+            },
+            {
+              "name": "string.quoted.sld",
+              "match": "\"[^\"]*\"|'[^']*'"
+            },
+            {
+              "name": "punctuation.definition.tag.sld",
+              "match": "/"
+            }
+          ]
+        },
+        {
+          "name": "variable.parameter.boolean.sld",
+          "match": "[a-zA-Z_][\\w\\-\\.]*"
+        },
+        {
+          "name": "string.quoted.sld",
+          "match": "\"[^\"]*\"|'[^']*'"
+        },
+        {
+          "name": "punctuation.definition.tag.sld",
+          "match": "<|>"
         }
       ]
     }
-  },
-  "patterns": [
-    {
-      "begin": "(?i)(\\s*(sld))(`)",
-      "beginCaptures": {
-        "1": {
-          "name": "comment.block"
-        }
-      },
-      "end": "(`)",
-      "patterns": [
-        {
-          "include": "text.xml"
-        }
-      ]
-    }
-  ],
-  "scopeName": "inline.sld"
+  }
 }

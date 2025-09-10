@@ -1,0 +1,38 @@
+{
+  "fileTypes": [
+    "js",
+    "mjs",
+    "jsx",
+    "ts",
+    "mts",
+    "tsx"
+  ],
+  "injectionSelector": "L:source.js -comment -string, L:source.mjs -comment -string, L:source.jsx -comment -string, L:source.ts -comment -string, L:source.mts -comment -string, L:source.tsx -comment -string",
+  "injections": {
+    "L:source": {
+      "patterns": [
+        {
+          "match": "<",
+          "name": "invalid.illegal.bad-angle-bracket.html"
+        }
+      ]
+    }
+  },
+  "patterns": [
+    {
+      "begin": "(?i)(\\s*(sld))(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "comment.block"
+        }
+      },
+      "end": "(`)",
+      "patterns": [
+        {
+          "include": "source.sld"
+        }
+      ]
+    }
+  ],
+  "scopeName": "inline.sld"
+}

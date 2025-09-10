@@ -6,24 +6,30 @@
   "engines": {
     "vscode": ">=1.70.0"
   },
-  "categories": ["Programming Languages"],
+  "categories": [
+    "Programming Languages"
+  ],
   "contributes": {
     "grammars": [
-			{
-				"injectTo": [
-					"source.js",
+      {
+        "injectTo": [
+          "source.js",
           "source.mjs",
-					"source.jsx",
-					"source.ts",
+          "source.jsx",
+          "source.ts",
           "source.mts",
-					"source.tsx"
-				],
-				"scopeName": "inline.sld",
-				"path": "./syntaxes/sld.json",
-				"embeddedLanguages": {
-					"meta.embedded.xml": "xml"
-				}
-			}
+          "source.tsx"
+        ],
+        "scopeName": "inline.sld",
+        "path": "./syntaxes/inline-sld.json",
+        "embeddedLanguages": {
+          "meta.embedded.xml": "xml"
+        }
+      },
+      {
+        "scopeName": "source.sld",
+        "path": "./syntaxes/sld.json"
+      }
     ]
   }
 }
