@@ -1,0 +1,29 @@
+{
+  "name": "vscode-sld",
+  "displayName": "Sld Tagged Template Highlighter",
+  "description": "Syntax highlighting for sld tagged template literals with XML-like syntax.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": ">=1.70.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "grammars": [
+			{
+				"injectTo": [
+					"source.js",
+          "source.mjs",
+					"source.jsx",
+					"source.ts",
+          "source.mts",
+					"source.tsx"
+				],
+				"scopeName": "inline.sld",
+				"path": "./syntaxes/sld.json",
+				"embeddedLanguages": {
+					"meta.embedded.xml": "xml"
+				}
+			}
+    ]
+  }
+}
