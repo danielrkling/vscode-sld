@@ -9,6 +9,12 @@
   "categories": [
     "Programming Languages"
   ],
+  "main": "./extension.js",
+  "browser": "./extension.js",
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript"
+  ],
   "contributes": {
     "grammars": [
       {
@@ -21,15 +27,26 @@
           "source.tsx"
         ],
         "scopeName": "inline.sld",
-        "path": "./syntaxes/inline-sld.json",
-        "embeddedLanguages": {
-          "meta.embedded.xml": "xml"
-        }
+        "path": "./syntaxes/inline-sld.json"
       },
       {
         "scopeName": "source.sld",
         "path": "./syntaxes/sld.json"
       }
+    ],
+    "formatters": [
+      {
+        "id": "sld Formatter",
+        "languages": [
+          "javascript",
+          "typescript"
+        ]
+      }
     ]
+  },
+  "dependencies": {
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
+    "html5parser": "^2.0.2"
   }
 }
