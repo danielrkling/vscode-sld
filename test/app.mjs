@@ -1,0 +1,1 @@
+sld`<div><Counter>Hello World</Counter></div>`
