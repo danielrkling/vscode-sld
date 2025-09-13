@@ -1,6 +1,6 @@
 {
   "name": "vscode-sld",
-  "displayName": "Sld Tagged Template Highlighter",
+  "displayName": "sld - solid-js Tagged Templates",
   "description": "Syntax highlighting for sld tagged template literals with XML-like syntax.",
   "version": "0.0.1",
   "engines": {
@@ -9,8 +9,8 @@
   "categories": [
     "Programming Languages"
   ],
-  "main": "./extension.js",
-  "browser": "./extension.js",
+  "main": "./dist/extension.js",
+  "browser": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:javascript",
     "onLanguage:typescript"
@@ -45,9 +45,13 @@
     ]
   },
   "dependencies": {
+    "@babel/parser": "^7.28.4",
+    "@babel/standalone": "^7.28.4",
+    "@babel/traverse": "^7.28.4",
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
-    "html5parser": "^2.0.2"
+    "html5parser": "^2.0.2",
+    "typescript": "^5.9.2"
   },
   "devDependencies": {
     "@types/vscode": "^1.104.0",
@@ -55,8 +59,8 @@
     "esbuild": "^0.25.9"
   },
   "scripts": {
-    "build": "esbuild ./src/extension.ts --bundle --platform=node --target=node18 --outfile=./extension.js --external:vscode",
-    "watch": "esbuild ./src/extension.ts --bundle --platform=node --target=node18 --outfile=./extension.js --external:vscode --watch",
+    "build": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode",
+    "watch": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --watch",
     "prepublish": "npm run build",
     "test": "vscode-test-web --extensionDevelopmentPath=. ./test"
   }

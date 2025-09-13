@@ -4,6 +4,9 @@
   "patterns": [
     {
       "include": "#tag"
+    },
+    {
+      "include": "#comment"
     }
   ],
   "repository": {
@@ -106,6 +109,26 @@
       "patterns": [
         {
           "include": "source.ts"
+        }
+      ]
+    },
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.block.sld",
+          "begin": "<!--",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.sld"
+            }
+          },
+          "end": "-->",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.sld"
+            }
+          },
+          "contentName": "comment.block.sld"
         }
       ]
     }
