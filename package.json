@@ -2,12 +2,21 @@
   "name": "vscode-sld",
   "displayName": "sld - solid-js Tagged Templates",
   "description": "Syntax highlighting for sld tagged template literals with XML-like syntax.",
+  "publisher": "danielrkling",
+  "repository": {
+    "url": "https://github.com/danielrkling/vscode-sld"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": ">=1.70.0"
   },
   "categories": [
     "Programming Languages"
+  ],
+  "keywords": [
+    "solid-js",
+    "sld",
+    "tagged templates"
   ],
   "main": "./dist/extension.js",
   "browser": "./dist/extension.js",
@@ -20,10 +29,8 @@
       {
         "injectTo": [
           "source.js",
-          "source.mjs",
           "source.jsx",
           "source.ts",
-          "source.mts",
           "source.tsx"
         ],
         "scopeName": "inline.sld",
@@ -42,24 +49,31 @@
           "typescript"
         ]
       }
+    ],
+    "typescriptServerPlugins": [
+      {
+        "name": "sld-plugin",
+        "description": "Provides validation for SLD tagged templates.",
+        "versions": "^0.0.0"
+      }
     ]
   },
   "dependencies": {
-    "@babel/parser": "^7.28.4",
-    "@babel/standalone": "^7.28.4",
-    "@babel/traverse": "^7.28.4",
-    "acorn": "^8.15.0",
-    "acorn-walk": "^8.3.4",
     "html5parser": "^2.0.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   },
   "devDependencies": {
-    "@types/vscode": "^1.104.0",
+    "@types/vscode": "^1.70.0",
     "@vscode/test-web": "^0.0.73",
+    "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.25.9"
   },
   "scripts": {
-    "build": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode",
+    "build:server":"esbuild ./src/server/main.ts --bundle --format=cjs --outfile=./dist/server.js --external:vscode --minify",
+    "build": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --minify",
     "watch": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --watch",
     "prepublish": "npm run build",
     "test": "vscode-test-web --extensionDevelopmentPath=. ./test"

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as html5parser from "html5parser";
-import * as ts from "typescript";
+import ts from "typescript";
 
 const markerSymbol = "⦿"; // Unique symbol to avoid collisions
 
@@ -23,28 +23,24 @@ export const formatter = {
         // 'node.tag' is the expression that's used as the tag (e.g., 'highlight' or 'myTag').
         // 'node.template' is the template literal itself.
         const tag = node.tag.getText(sourceFile);
+        const template = node.template;
         let html = "";
         if (/sld/i.test(tag)) {
-          if (ts.isNoSubstitutionTemplateLiteral(node.template)) {
-            html = formatHtmlAst(
-              html5parser.parse(node.template.text),
-              markerSymbol,
-              document.lineAt(document.positionAt(node.template.getStart()).line).firstNonWhitespaceCharacterIndex/getTabSize() + 1
-            );
-          } else if (ts.isTemplateExpression(node.template)) {
+          const indentLevel =
+            document.lineAt(document.positionAt(template.getStart()).line)
+              .firstNonWhitespaceCharacterIndex /
+            (vscode.window.activeTextEditor?.options.indentSize as number);
+          if (ts.isNoSubstitutionTemplateLiteral(template)) {
+            html = formatNodes(html5parser.parse(template.text), indentLevel);
+          } else if (ts.isTemplateExpression(template)) {
             html = [
-              node.template.head.text,
-              ...node.template.templateSpans.map((span) => span.literal.text),
+              template.head.text,
+              ...template.templateSpans.map((span) => span.literal.text),
             ].join(markerSymbol);
-            html = formatHtmlAst(
-              html5parser.parse(html),
-              markerSymbol,
-              document.lineAt(document.positionAt(node.template.getStart()).line).firstNonWhitespaceCharacterIndex/getTabSize() + 1
-            );
+            html = formatNodes(html5parser.parse(html), indentLevel);
             const parts = html.split(markerSymbol);
-            console.log(node);
             html = parts.slice(1).reduce((acc, part, index) => {
-              return `${acc}\${${node.template.templateSpans[
+              return `${acc}\${${template.templateSpans[
                 index
               ].expression.getText(sourceFile)}}${part}`;
             }, parts[0]);
@@ -53,8 +49,8 @@ export const formatter = {
           allEdits.push(
             vscode.TextEdit.replace(
               new vscode.Range(
-                document.positionAt(node.template.getStart() + 1),
-                document.positionAt(node.template.getEnd() - 1)
+                document.positionAt(template.getStart() + 1),
+                document.positionAt(template.getEnd() - 1)
               ),
               html
             )
@@ -75,76 +71,84 @@ export const formatter = {
     return allEdits;
   },
 };
-/**
- * Recursively walks the HTML AST to format it.
- * @param {Array<import('html5parser').INode>} nodes - The nodes to format.
- * @param {string} marker - The expression marker.
- * @param {number} indentLevel - The current indentation level.
- * @returns {string} - The formatted HTML.
- */
-function formatHtmlAst(nodes, marker, indentLevel = 0) {
-  let formattedCode = "";
-  const tabSize = getTabSize();
-  const indent = " ".repeat(tabSize).repeat(indentLevel);
 
-  nodes.forEach((node: html5parser.INode) => {
-    if (node.type === html5parser.SyntaxKind.Tag) {
-      const attributeGap =
-        node.attributes.length > 2 ? "\n" + indent + " ".repeat(tabSize) : " ";
-      const closingGap = node.attributes.length > 2 ? "\n" + indent : "";
-      // Format opening tag
-      formattedCode += `\n${indent}<${node.rawName}`;
-      node.attributes?.forEach((attr) => {
-        if (attr.value) {
-          if (attr.value.value === markerSymbol) {
-            formattedCode += `${attributeGap}${attr.name.value}=${attr.value.value}`;
-          } else {
-            formattedCode += `${attributeGap}${attr.name.value}="${attr.value.value}"`;
-          }
-        } else {
-          formattedCode += `${attributeGap}${attr.name.value}`;
-        }
-      });
-      if (node.name.startsWith("!--")) {
-        formattedCode += `${node.body[0].value} -->`;
-      } else      if (node.body?.length) {
-        formattedCode += `${closingGap}>`;
-        formattedCode += formatHtmlAst(node.body, marker, indentLevel + 1);
-        formattedCode += `\n${indent}</${node.rawName}>`;
-      } else {
-        formattedCode += `${closingGap}/>`;
-      }
-    } else if (node.type === html5parser.SyntaxKind.Text) {
-      // Trim and add text content
-      
-      const trimmedText = node.value.trim();
-      if (trimmedText) {
-        formattedCode += `\n${indent}${trimmedText}`;
-      }
+function formatNodes(nodes: html5parser.INode[], level: number) {
+  return nodes.map((node) => formatNode(node, level + 1)).join("");
+}
+
+function wrap(value: string,level:number){
+    return "\n"+ getIndent(level+1) + value+ "\n"+ getIndent(level)
+}
+
+function formatNode(node: html5parser.INode, level: number) {
+  if (node.type === html5parser.SyntaxKind.Text) {
+    return formatTextNode(node, level);
+  } else {
+    if (node.name.startsWith("!") || node.name === "") {
+      return "\n"+ getIndent(level) + formatCommentNode(node);
+    } else {
+      return getIndent(level) + formatTagNode(node, level);
     }
-  });
-
-  return formattedCode;
+  }
 }
 
-function getNodeIndentation(node: ts.Node, sourceFile: ts.SourceFile): number {
-  // Get the character position of the start of the node.
-  const startPosition = node.getStart(sourceFile);
-
-  // Get the line and character details for this position.
-  const { line, character } =
-    sourceFile.getLineAndCharacterOfPosition(startPosition);
-
-  // Get the position of the start of the line.
-  const lineStart = sourceFile.l
-
-  // The indentation is the difference between the node's start position and the line's start position.
-  return 
+function formatTagNode(node: html5parser.ITag, level: number) {
+  if (node.body?.length) {
+    return `<${node.rawName}${formatAttributes(
+      node.attributes ?? [],
+      level
+    )}>${wrap(formatNodes(node.body, level),level)}</${node.rawName}>`;
+  } else {
+    return `<${node.rawName}${formatAttributes(
+      node.attributes ?? [],
+      level
+    )}/>`;
+  }
 }
 
-function getTabSize(): number {
-  const editor = vscode.window.activeTextEditor;
+function formatTextNode(node: html5parser.IText, level: number) {
+    const value = node.value.trim();
+    if (value.length<20){
+        return value
+    }
+    return "\n"+getIndent(level) + value
+}
 
-  return editor?.options.indentSize ?? 4
+function formatAttributes(attributes: html5parser.IAttribute[], level: number) {
+  if (attributes.length > 2) {
+    return `\n${getIndent(level + 1)}${attributes
+      .map(formatAttribute)
+      .join(`\n${getIndent(level + 1)}`)}\n${getIndent(level)}`;
+  } else {
+    return attributes.map(formatAttribute).join(" ");
+  }
+}
 
+function formatAttribute(attribute: html5parser.IAttribute) {
+  const value = attribute.value?.value;
+  if (value) {
+    if (value === markerSymbol) {
+      return `${attribute.name.value}=${value}`;
+    } else {
+      return `${attribute.name.value}="${value}"`;
+    }
+  } else {
+    return attribute.name.value;
+  }
+}
+
+
+
+function formatCommentNode(node: html5parser.ITag) {
+  const comment = node.body
+    ?.filter((v) => v.type === html5parser.SyntaxKind.Text)
+    .map((v) => v.value)
+    .join("");
+  return `<!--${comment}-->`;
+}
+
+function getIndent(level: number) {
+  return " "
+    .repeat(vscode.window.activeTextEditor?.options.indentSize as number)
+    .repeat(level);
 }
