@@ -6,7 +6,7 @@
   "repository": {
     "url": "https://github.com/danielrkling/vscode-sld"
   },
-  "version": "0.1.0",
+  "version": "0.1.2",
   "engines": {
     "vscode": ">=1.70.0"
   },
@@ -19,7 +19,7 @@
     "tagged templates"
   ],
   "main": "./dist/extension.js",
-  "browser": "./dist/extension.js",
+  "browser": "./dist/web/extension.js",
   "activationEvents": [
     "onLanguage:javascript",
     "onLanguage:typescript"
@@ -49,14 +49,8 @@
           "typescript"
         ]
       }
-    ],
-    "typescriptServerPlugins": [
-      {
-        "name": "sld-plugin",
-        "description": "Provides validation for SLD tagged templates.",
-        "versions": "^0.0.0"
-      }
     ]
+
   },
   "dependencies": {
     "html5parser": "^2.0.2",
@@ -73,7 +67,8 @@
   },
   "scripts": {
     "build:server":"esbuild ./src/server/main.ts --bundle --format=cjs --outfile=./dist/server.js --external:vscode --minify",
-    "build": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --minify",
+    "build:web": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/web/extension.js --external:vscode --minify",
+    "build": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --external:typescript --minify",
     "watch": "esbuild ./src/extension.ts --bundle --format=cjs --outfile=./dist/extension.js --external:vscode --watch",
     "prepublish": "npm run build",
     "test": "vscode-test-web --extensionDevelopmentPath=. ./test"
