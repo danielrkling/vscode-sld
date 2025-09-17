@@ -25,19 +25,53 @@
     "onLanguage:typescript"
   ],
   "contributes": {
+        "languages": [
+      {
+        "id": "sld",
+        "extensions": [
+          ".sld"
+        ],
+        "aliases": [
+          "SLD",
+          "sld"
+        ],
+        "configuration": "./sld.language-configuration.json"
+      }
+    ],
     "grammars": [
       {
         "injectTo": [
           "source.js",
+          "source.js.jsx",
           "source.jsx",
           "source.ts",
-          "source.tsx"
+          "source.tsx",
+          "text.html"
         ],
-        "scopeName": "inline.sld",
-        "path": "./syntaxes/inline-sld.json"
+        "scopeName": "text.lit-sld",
+        "path": "./syntaxes/lit-sld.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.sld": "sld"
+        }
       },
       {
-        "scopeName": "source.sld",
+        "injectTo": [
+          "source.js",
+          "source.js.jsx",
+          "source.jsx",
+          "source.ts",
+          "source.tsx",
+          "text.html"
+        ],
+        "scopeName": "text.lit-sld.string.injection",
+        "path": "./syntaxes/lit-sld-string-injection.json",
+        "embeddedLanguages": {
+          "meta.template.expression.ts": "typescript"
+        }
+      },
+      {
+        "language": "sld",
+        "scopeName": "text.sld",
         "path": "./syntaxes/sld.json"
       }
     ],
