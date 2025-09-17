@@ -1,5 +1,5 @@
 {
-  "scopeName": "source.sld",
+  "scopeName": "text.sld",
   "injectionSelector": "L:source.js, L:source.ts T:template-string.sld",
   "patterns": [
     {
@@ -73,17 +73,17 @@
               "include": "source.ts#template-substitution-element"
             },
             {
-              "name": "string.quoted.js.template",
+              "name": "string.quoted.ts.template",
               "begin": "`",
               "beginCaptures": {
                 "0": {
-                  "name": "punctuation.definition.string.template.begin.js"
+                  "name": "punctuation.definition.string.template.begin.ts"
                 }
               },
               "end": "`",
               "endCaptures": {
                 "0": {
-                  "name": "punctuation.definition.string.template.end.js"
+                  "name": "punctuation.definition.string.template.end.ts"
                 }
               }
             }
@@ -104,12 +104,13 @@
           "name": "punctuation.definition.template-expression.end.ts"
         }
       },
-      "name": "meta.template.expression.js",
+      "name": "meta.template.expression.ts",
       "contentName": "meta.embedded.ts",
       "patterns": [
         {
           "include": "source.ts"
         }
+
       ]
     },
     "comment": {
