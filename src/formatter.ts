@@ -3,6 +3,8 @@ import * as html5parser from "html5parser";
 import ts from "typescript";
 
 const markerSymbol = "⦿"; // Unique symbol to avoid collisions
+const newLineMarker = "⊙";
+const match = /\${[⦿⊙]*}/;
 
 export const formatter = {
   provideDocumentFormattingEdits(document: vscode.TextDocument) {
@@ -26,23 +28,33 @@ export const formatter = {
         const template = node.template;
         let html = "";
         if (/sld/i.test(tag)) {
+          const indentSize = vscode.window.activeTextEditor?.options
+            .indentSize as number;
+
           const indentLevel =
             document.lineAt(document.positionAt(template.getStart()).line)
-              .firstNonWhitespaceCharacterIndex /
-            (vscode.window.activeTextEditor?.options.indentSize as number);
+              .firstNonWhitespaceCharacterIndex / indentSize;
+
           if (ts.isNoSubstitutionTemplateLiteral(template)) {
             html = formatNodes(html5parser.parse(template.text), indentLevel);
           } else if (ts.isTemplateExpression(template)) {
-            html = [
-              template.head.text,
-              ...template.templateSpans.map((span) => span.literal.text),
-            ].join(markerSymbol);
+            const spans = template.templateSpans;
+
+            html = spans.reduce((acc, val) => {
+              const text = val.expression.getText(sourceFile);
+              return `${acc}\${${text
+                .replace(/[^\n]/g, markerSymbol)
+                .replace(/\n/g, newLineMarker)}}${val.literal.text}`;
+            }, template.head.text);
+
             html = formatNodes(html5parser.parse(html), indentLevel);
-            const parts = html.split(markerSymbol);
+
+            const parts = html.split(match);
+
             html = parts.slice(1).reduce((acc, part, index) => {
-              return `${acc}\${${template.templateSpans[
-                index
-              ].expression.getText(sourceFile)}}${part}`;
+              const expr = spans[index].expression.getText(sourceFile);
+
+              return `${acc}\${${expr}}${part}`;
             }, parts[0]);
           }
 
@@ -136,15 +148,21 @@ function formatTagNode(node: html5parser.ITag, level: number) {
 }
 
 function formatTextNode(node: html5parser.IText, level: number) {
-  const value = node.value.trim().split("\n").map(v=>v.trim())
-  if (value.length ===1){
-    return value[0]
+  const value = node.value
+    .trim()
+    .split("\n")
+    .map((v) => v.trim());
+  if (value.length === 1) {
+    return value[0];
   }
-  return wrapAndIndent(value,level-1)
+  return wrapAndIndent(value, level - 1);
 }
 
 function formatAttributes(attributes: html5parser.IAttribute[], level: number) {
-  if (attributes.length > 2) {
+  if (
+    attributes.length > 2 ||
+    attributes.some((v) => v.value?.value.includes(newLineMarker))
+  ) {
     return wrapAndIndent(attributes.map(formatAttribute), level);
   } else if (attributes.length) {
     return " " + attributes.map(formatAttribute).join(" ");
@@ -155,7 +173,7 @@ function formatAttributes(attributes: html5parser.IAttribute[], level: number) {
 function formatAttribute(attribute: html5parser.IAttribute) {
   const value = attribute.value?.value;
   if (value) {
-    if (value === markerSymbol) {
+    if (match.test(value)) {
       return `${attribute.name.value}=${value}`;
     } else {
       return `${attribute.name.value}="${value}"`;
